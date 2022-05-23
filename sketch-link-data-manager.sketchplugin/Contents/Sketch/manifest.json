@@ -1,0 +1,33 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "commands": [
+    {
+      "name": "Sketch Link Data manager",
+      "identifier": "sldm-script",
+      "script": "__script.js",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    }
+  ],
+  "menu": {
+    "title": "sketch-link-data-manager",
+    "items": [
+      "sldm-script"
+    ],
+    "isRoot": true
+  },
+  "icon": "icon.png",
+  "version": "2.0.0",
+  "description": "With this plugin you can export to your desktop a design-tokens.json file compatible with Amazon Style Dictionary.",
+  "name": "Sketch - Link Data manager",
+  "identifier": "Sketch - Link Data manager",
+  "disableCocoaScriptPreprocessor": true,
+  "appcast": "https://raw.githubusercontent.com/icona79/sketch-link-data-manager/master/.appcast.xml",
+  "author": "Matteo Gratton",
+  "authorEmail": "icona79@gmail.com"
+}
