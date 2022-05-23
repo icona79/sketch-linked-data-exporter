@@ -1,0 +1,21 @@
+{
+    "compatibleVersion": 3,
+    "bundleVersion": 1,
+    "commands": [{
+        "name": "Sketch Link Data manager",
+        "identifier": "sldm-script",
+        "script": "./script.js",
+        "handlers": {
+            "run": "onRun",
+            "actions": {
+                "Shutdown": "onShutdown"
+            }
+        }
+    }],
+    "menu": {
+        "title": "sketch-link-data-manager",
+        "items": ["sldm-script"],
+        "isRoot": true
+    },
+    "icon": "icon.png"
+}
