@@ -1109,8 +1109,18 @@ var exportOptions = {
     return "type" in tbc && tbc.type == "Group";
   }
 
+  var doc = getSelectedDocument();
+
+  if (doc.selectedLayers.length !== 1) {
+    message("☝️ Select exactly one layer group to create data set.");
+    return;
+  }
+
+  var selected = doc.selectedLayers.layers[0];
+
   var toData = function toData(layer) {
-    console.log(layer);
+    var parent = document.selectedLayers.layers[0].parent;
+    var name = layer.name;
 
     switch (layer.type) {
       // text layers use the value
@@ -1118,8 +1128,7 @@ var exportOptions = {
         return layer.text;
 
       case "Image":
-        var currentImage = extractImages(layer);
-        console.log(currentImage);
+        var currentImage = extractImages(layer, name, parent);
         return currentImage;
       // symbol instances can have override values
 
@@ -1151,14 +1160,16 @@ var exportOptions = {
 
             var _parentPath = pathComponents.join("/");
 
+            var affectedLayerName = o.affectedLayer.name;
+
             if (o.property === "symbolID") {
               dataGroupByPath[o.path] = {};
-              dataGroupByPath[_parentPath][o.affectedLayer.name] = dataGroupByPath[o.path];
+              dataGroupByPath[_parentPath][affectedLayerName] = dataGroupByPath[o.path];
               continue;
             }
 
-            dataGroupByPath[_parentPath][o.affectedLayer.name] = o.property === "image" ? console.log(o.value) : o.value;
-            hasValues = true; // o.property === "image" ? "/path/to/image.png" : o.value;
+            dataGroupByPath[_parentPath][affectedLayerName] = o.property === "image" ? extractImagesFromSymbol(o.value, affectedLayerName, layer) : o.value;
+            hasValues = true;
           } // We need to remove the nodes that don't have any values
 
         } catch (err) {
@@ -1172,15 +1183,14 @@ var exportOptions = {
       // other layers can have image fills, in case of multiple image fills only
 
       default:
-        var fills = layer.style.fills; // console.log(fills);
+        var fills = layer.style.fills;
 
         for (var n = 0; n < fills.length; n++) {
-          var currentFill = fills[n]; //   console.log(currentFill);
+          var currentFill = fills[n];
 
           if (currentFill.fillType === "Pattern") {
-            var _currentImage = extractImages(layer);
+            var _currentImage = extractImages(layer, name, parent);
 
-            console.log(_currentImage);
             return _currentImage;
           } else {
             break;
@@ -1221,14 +1231,6 @@ var exportOptions = {
     return value;
   };
 
-  var doc = getSelectedDocument();
-
-  if (doc.selectedLayers.length !== 1) {
-    message("☝️ Select exactly one layer group to create data set.");
-    return;
-  }
-
-  var selected = doc.selectedLayers.layers[0];
   var data = walk(selected, toData, undefined); // `data` can be `undefined` if the symbol overrides
   // in the selected layer are disabled
 
@@ -1248,6 +1250,92 @@ var exportOptions = {
 // Script functions
 // **************************************
 
+function toDataFunc(selectedLayer) {
+  var toDataFuncData = function toDataFuncData(layer) {
+    var parent = selectedLayer;
+    var name = layer.name;
+
+    switch (layer.type) {
+      // text layers use the value
+      case "Text":
+        return layer.text;
+
+      case "Image":
+        var currentImage = extractImages(layer, name, parent);
+        return currentImage;
+      // symbol instances can have override values
+
+      case "SymbolInstance":
+      case "SymbolMaster":
+        // ensure overrides for nested symbols won't be processed before the
+        // actual symbol override and filter out any override values that cannot
+        // be used with data
+        var supportedProperties = ["symbolID", "stringValue", "image"];
+        var overrides = layer.overrides.sort(function (a, b) {
+          return a.path.localeCompare(b.path);
+        }).filter(function (val) {
+          return supportedProperties.includes(val.property);
+        });
+        var data = {};
+        var dataGroupByPath = {
+          "": data
+        };
+        var hasValues = false;
+
+        var _iterator3 = _createForOfIteratorHelper(overrides),
+            _step3;
+
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var o = _step3.value;
+            var pathComponents = o.path.split("/");
+            pathComponents.pop();
+
+            var _parentPath2 = pathComponents.join("/");
+
+            var affectedLayerName = o.affectedLayer.name;
+
+            if (o.property === "symbolID") {
+              dataGroupByPath[o.path] = {};
+              dataGroupByPath[_parentPath2][affectedLayerName] = dataGroupByPath[o.path];
+              continue;
+            }
+
+            dataGroupByPath[_parentPath2][affectedLayerName] = o.property === "image" ? extractImagesFromSymbol(o.value, affectedLayerName, layer) : o.value;
+            hasValues = true;
+          } // We need to remove the nodes that don't have any values
+
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+
+        data = removeEmptyNodes(data);
+        return hasValues ? data : undefined;
+      // other layers can have image fills, in case of multiple image fills only
+
+      default:
+        var fills = layer.style.fills;
+
+        for (var n = 0; n < fills.length; n++) {
+          var currentFill = fills[n];
+
+          if (currentFill.fillType === "Pattern") {
+            var _currentImage2 = extractImages(layer, name, parent);
+
+            return _currentImage2;
+          } else {
+            break;
+          }
+        }
+
+    }
+
+    return undefined;
+  };
+}
+
 function createFolder(folder) {
   try {
     if (!fs.existsSync(folder)) {
@@ -1258,13 +1346,16 @@ function createFolder(folder) {
   }
 }
 
-function extractImages(layer) {
+function extractImages(layer, name, parent) {
+  console.log(layer);
+  var layerParent = parent;
   var image = sketch.Image;
   var ShapePath = sketch.ShapePath;
   var Style = sketch.Style;
   var Rectangle = sketch.Rectangle;
   var selectedLayer = layer;
-  var selectedLayerName = selectedLayer.name.replace(/\s/g, "-");
+  var selectedLayerName = name;
+  selectedLayerName = selectedLayerName.replace(/\s/g, "-");
   selectedLayerName = selectedLayerName.replace(/\_+/g, "-");
   selectedLayerName = selectedLayerName.replace(/\/+/g, "-");
   selectedLayerName = selectedLayerName.replace(/\-+/g, "-").toLowerCase();
@@ -1287,6 +1378,7 @@ function extractImages(layer) {
   }
 
   var image = extractedImage;
+  console.log(image);
   var rectangle = new ShapePath({
     name: selectedLayerName,
     frame: new Rectangle(selectedLayer.frame),
@@ -1299,7 +1391,7 @@ function extractImages(layer) {
         }
       }]
     },
-    parent: document.selectedLayers.layers[0].parent
+    parent: layerParent
   });
   var nsImage;
 
@@ -1334,6 +1426,24 @@ function extractImages(layer) {
   sketch.export(rectangle, exportOptions);
   rectangle.remove();
   return "images/" + selectedLayerName + ".png";
+}
+
+function extractFromSymbol(layer, name, parent) {// let layerParent = parent.duplicate();
+  // let group = layerParent.detach();
+  // group.selected = true;
+  // let layer =
+  // let name = layer.name;
+  // switch (layer.type) {
+  //     // text layers use the value
+  //     case "Text":
+  //         return layer.text;
+  //     case "Image":
+  //         let currentImage = extractImages(layer, name, parent);
+  //         return currentImage;
+  // }
+  // let currentImage = extractImages(layer, name, group);
+  // group.remove();
+  // return currentImage;
 } // **************************************
 // Object functions
 // **************************************
