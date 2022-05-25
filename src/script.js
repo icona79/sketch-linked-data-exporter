@@ -1,3 +1,8 @@
+// TODO:
+// 1. move the folter into Sketch folder
+// 2. name of the JSON file = name of the selected layer
+// 3. add to Sketch automatically
+
 import rgbHex from "rgb-hex";
 import hexRgb from "hex-rgb";
 import { isDeepStrictEqual } from "util";
@@ -76,6 +81,7 @@ export default function () {
     const toData = (layer) => {
         let parent = document.selectedLayers.layers[0].parent;
         let name = layer.name;
+        console.log(name);
         switch (layer.type) {
             // text layers use the value
             case "Text":
@@ -101,7 +107,6 @@ export default function () {
                 var data = {};
                 var dataGroupByPath = { "": data };
                 var hasValues = false;
-
                 for (const o of overrides) {
                     let pathComponents = o.path.split("/");
                     pathComponents.pop();
@@ -115,17 +120,14 @@ export default function () {
                         continue;
                     }
 
-                    dataGroupByPath[parentPath][affectedLayerName] =
+                    dataGroupByPath[parentPath][o.affectedLayer.name] =
                         o.property === "image"
-                            ? extractImagesFromSymbol(
-                                  o.value,
-                                  affectedLayerName,
-                                  layer
-                              )
+                            ? symbolImages(layer, affectedLayerName)
                             : o.value;
                     hasValues = true;
                 }
                 // We need to remove the nodes that don't have any values
+                console.log(data);
                 data = removeEmptyNodes(data);
 
                 return hasValues ? data : undefined;
@@ -148,18 +150,27 @@ export default function () {
 
     const walk = (layer, extract, initialValue) => {
         if (!isLayerGroup(layer)) {
+            console.log(layer.name);
             return extract(layer);
         }
 
         var value = initialValue;
         for (const l of Array.from(layer.layers).reverse()) {
             // layer groups can only create nested data objects, not values
-            let v = isLayerGroup(l)
-                ? walk(l.layers, extract, undefined)
-                : extract(l);
+            let v;
+            if (isLayerGroup(l)) {
+                console.log(l.layers);
+                for (let i = 0; i < l.layers.length; i++) {
+                    v = walk(l.layers[i], extract, undefined);
+                }
+            } else {
+                v = extract(l);
+            }
+
             if (v === undefined) continue;
             value = { ...value, [l.name]: v };
         }
+
         return value;
     };
 
@@ -187,81 +198,6 @@ export default function () {
 // **************************************
 // Script functions
 // **************************************
-function toDataFunc(selectedLayer) {
-    const toDataFuncData = (layer) => {
-        let parent = selectedLayer;
-        let name = layer.name;
-        switch (layer.type) {
-            // text layers use the value
-            case "Text":
-                return layer.text;
-
-            case "Image":
-                let currentImage = extractImages(layer, name, parent);
-                return currentImage;
-
-            // symbol instances can have override values
-            case "SymbolInstance":
-            case "SymbolMaster":
-                // ensure overrides for nested symbols won't be processed before the
-                // actual symbol override and filter out any override values that cannot
-                // be used with data
-                let supportedProperties = ["symbolID", "stringValue", "image"];
-                let overrides = layer.overrides
-                    .sort((a, b) => a.path.localeCompare(b.path))
-                    .filter((val) =>
-                        supportedProperties.includes(val.property)
-                    );
-
-                var data = {};
-                var dataGroupByPath = { "": data };
-                var hasValues = false;
-
-                for (const o of overrides) {
-                    let pathComponents = o.path.split("/");
-                    pathComponents.pop();
-                    let parentPath = pathComponents.join("/");
-                    let affectedLayerName = o.affectedLayer.name;
-
-                    if (o.property === "symbolID") {
-                        dataGroupByPath[o.path] = {};
-                        dataGroupByPath[parentPath][affectedLayerName] =
-                            dataGroupByPath[o.path];
-                        continue;
-                    }
-
-                    dataGroupByPath[parentPath][affectedLayerName] =
-                        o.property === "image"
-                            ? extractImagesFromSymbol(
-                                  o.value,
-                                  affectedLayerName,
-                                  layer
-                              )
-                            : o.value;
-                    hasValues = true;
-                }
-                // We need to remove the nodes that don't have any values
-                data = removeEmptyNodes(data);
-
-                return hasValues ? data : undefined;
-
-            // other layers can have image fills, in case of multiple image fills only
-            default:
-                let fills = layer.style.fills;
-                for (let n = 0; n < fills.length; n++) {
-                    let currentFill = fills[n];
-                    if (currentFill.fillType === "Pattern") {
-                        let currentImage = extractImages(layer, name, parent);
-                        return currentImage;
-                    } else {
-                        break;
-                    }
-                }
-        }
-        return undefined;
-    };
-}
-
 function createFolder(folder) {
     try {
         if (!fs.existsSync(folder)) {
@@ -273,7 +209,6 @@ function createFolder(folder) {
 }
 
 function extractImages(layer, name, parent) {
-    console.log(layer);
     let layerParent = parent;
     var image = sketch.Image;
     var ShapePath = sketch.ShapePath;
@@ -302,7 +237,6 @@ function extractImages(layer, name, parent) {
         extractedImage = selectedLayer.style.fills[0].pattern.image.nsimage;
     }
     var image = extractedImage;
-    console.log(image);
 
     let rectangle = new ShapePath({
         name: selectedLayerName,
@@ -362,24 +296,136 @@ function extractImages(layer, name, parent) {
     return "images/" + selectedLayerName + ".png";
 }
 
-function extractFromSymbol(layer, name, parent) {
-    // let layerParent = parent.duplicate();
-    // let group = layerParent.detach();
-    // group.selected = true;
-    // let layer =
-    // let name = layer.name;
-    // switch (layer.type) {
-    //     // text layers use the value
-    //     case "Text":
-    //         return layer.text;
-    //     case "Image":
-    //         let currentImage = extractImages(layer, name, parent);
-    //         return currentImage;
-    // }
-    // let currentImage = extractImages(layer, name, group);
-    // group.remove();
-    // return currentImage;
+function symbolImages(layer, layerName) {
+    let group;
+    if (layer.type === "SymbolInstance") {
+        group = layer.duplicate().detach();
+        group.name = "Group-" + layerName;
+    } else if (layer.type === "SymbolMaster") {
+        group = layer;
+    }
+    let affectedLayerName = layerName;
+    let currentImage;
+    for (let l = 0; l < group.layers.length; l++) {
+        let currentLayer = group.layers[l];
+        if (
+            currentLayer.type === "Image" &&
+            currentLayer.name === affectedLayerName
+        ) {
+            currentImage = extractImages(
+                currentLayer,
+                affectedLayerName,
+                group
+            );
+        } else if (
+            currentLayer.type === "ShapePath" &&
+            currentLayer.name === affectedLayerName
+        ) {
+            let fills = currentLayer.style.fills;
+            for (let n = 0; n < fills.length; n++) {
+                let currentFill = fills[n];
+                if (currentFill.fillType === "Pattern") {
+                    currentImage = extractImages(
+                        currentLayer,
+                        affectedLayerName,
+                        group
+                    );
+                }
+            }
+        } else if (
+            currentLayer.type === "SymbolInstance" &&
+            currentLayer.name === affectedLayerName
+        ) {
+            currentImage = symbolImages(currentLayer, currentLayer.name);
+        }
+    }
+    if (layer.type === "SymbolInstance") {
+        group.remove();
+    }
+
+    return currentImage;
 }
+
+function extractGroups(parent) {
+    let groupData = {};
+    let groupDataGroupByPath = { "": groupData };
+    let groupPath = parent.name;
+    let groupDatahasValues = false;
+    for (let l = 0; l < parent.layers.length; l++) {
+        let layer = parent.layers[l];
+        let name = layer.name;
+        switch (layer.type) {
+            // text layers use the value
+            case "Text":
+                groupDataGroupByPath[groupPath][name] = layer.text;
+
+            case "Image":
+                let currentImage = extractImages(layer, name, parent);
+                groupDataGroupByPath[groupPath][name] = currentImage;
+
+            case "Group":
+                let groupData = extractGroups(layer);
+                groupDataGroupByPath[groupPath][name] = groupData;
+
+            // symbol instances can have override values
+            case "SymbolInstance":
+            case "SymbolMaster":
+                // ensure overrides for nested symbols won't be processed before the
+                // actual symbol override and filter out any override values that cannot
+                // be used with data
+                let supportedProperties = ["symbolID", "stringValue", "image"];
+                let overrides = layer.overrides
+                    .sort((a, b) => a.path.localeCompare(b.path))
+                    .filter((val) =>
+                        supportedProperties.includes(val.property)
+                    );
+
+                var data = {};
+                var dataGroupByPath = { "": data };
+                var hasValues = false;
+                for (const o of overrides) {
+                    let pathComponents = o.path.split("/");
+                    pathComponents.pop();
+                    let parentPath = pathComponents.join("/");
+                    let affectedLayerName = o.affectedLayer.name;
+
+                    if (o.property === "symbolID") {
+                        dataGroupByPath[o.path] = {};
+                        dataGroupByPath[parentPath][affectedLayerName] =
+                            dataGroupByPath[o.path];
+                        continue;
+                    }
+
+                    dataGroupByPath[parentPath][o.affectedLayer.name] =
+                        o.property === "image"
+                            ? symbolImages(layer, affectedLayerName)
+                            : o.value;
+                    hasValues = true;
+                }
+                // We need to remove the nodes that don't have any values
+                console.log(data);
+                data = removeEmptyNodes(data);
+
+                groupDataGroupByPath[groupPath][name] = hasValues
+                    ? data
+                    : undefined;
+
+            // other layers can have image fills, in case of multiple image fills only
+            default:
+                let fills = layer.style.fills;
+                for (let n = 0; n < fills.length; n++) {
+                    let currentFill = fills[n];
+                    if (currentFill.fillType === "Pattern") {
+                        let currentImage = extractImages(layer, name, parent);
+                        groupDataGroupByPath[groupPath][name] = currentImage;
+                    } else {
+                        break;
+                    }
+                }
+        }
+    }
+}
+
 // **************************************
 // Object functions
 // **************************************
@@ -453,53 +499,4 @@ function lowercaseObjectValues(object) {
         }
     }
     return object;
-}
-
-/**
- * Get the key in the object associated with the defined value
- * The discard parameter permit to remove part of the value string if needed
- */
-function getKeyByValue(object, value, discard = "") {
-    if (typeof value === "string") {
-        value = value.replace(discard, "");
-    }
-    return Object.keys(object).find((key) => object[key] === value);
-}
-
-/**
- * Generate nested Objects by splitting a sting
- * Usages:
- * createNestedObject(window, ['shapes', 'circle'])
- *   Now window.shapes.circle is an empty object, ready to be used.
- * var object = {} // Works with any object other that window too
- * createNestedObject(object, ['shapes', 'rectangle', 'width'], 300)
- *   Now we have: object.shapes.rectangle.width === 300
- * createNestedObject(object, 'shapes.rectangle.height'.split('.'), 400)
- *   Now we have: object.shapes.rectangle.height === 400
- */
-function createNestedObject(object, keys, value) {
-    // If a value is given, remove the last name and keep it for later:
-    var lastKey = arguments.length === 3 ? keys.pop() : false;
-    // Walk the hierarchy, creating new objects where needed.
-    // If the lastKey was removed, then the last object is not set yet:
-    for (var i = 0; i < keys.length; i++) {
-        object = object[keys[i]] = object[keys[i]] || {};
-    }
-
-    // If a value was given, set it to the last name:
-    if (lastKey) object = object[lastKey] = value;
-
-    // Return the last object in the hierarchy:
-    return object;
-}
-
-/**
- * Check if an object is empy
- */
-function isEmptyObj(object) {
-    let isEmpty = false;
-    if (Object.keys(object).length === 0) {
-        isEmpty = true;
-    }
-    return isEmpty;
 }
