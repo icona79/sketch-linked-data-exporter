@@ -2,34 +2,43 @@
 // 1. move the folter into Sketch folder
 // 2. name of the JSON file = name of the selected layer
 // 3. add to Sketch automatically
+var sketch = require("sketch");
+var document = sketch.getSelectedDocument();
+var documentName = normalizePaths(document.path.split("/").reverse()[0]);
 
 var { isNativeObject } = require("util");
 const fs = require("@skpm/fs");
 const os = require("os");
 const path = require("path");
 const desktopDir = path.join(os.homedir(), "Desktop");
+const sketchDir = path.join(
+    os.homedir(),
+    "Library/Application Support/com.bohemiancoding.sketch3"
+);
 
-const dataFolder = desktopDir + "/sketch-data";
+const sketchDataFolder = sketchDir + "/Link-Data";
+createFolder(sketchDataFolder);
+
+// Setup the folder structure to export our data
+
+const dataFolder = sketchDataFolder + "/Data-" + documentName;
 const imagesFolder = dataFolder + "/Images";
-
-var imagesArray = [];
-var imagesExportedArray = [];
 
 createFolder(dataFolder);
 createFolder(imagesFolder);
 
-// General variables
-
-// #region Sketch Items
-var sketch = require("sketch");
-
-// Document variables
-var document = sketch.getSelectedDocument();
 const exportOptions = {
     formats: "png",
     overwriting: true,
     output: imagesFolder,
 };
+
+// General variables
+var imagesArray = [];
+// #region Sketch Items
+
+// Document variables
+
 // #endregion
 
 export default function () {
@@ -43,11 +52,19 @@ export default function () {
     let doc = getSelectedDocument();
 
     if (doc.selectedLayers.length !== 1) {
-        message("☝️ Select exactly one layer group to create data set.");
+        message(
+            "☝️ Select one layer group or one symbol (main or instance) to create your data set."
+        );
         return;
     }
 
     let selected = doc.selectedLayers.layers[0];
+
+    // JSON File name = selected layer name
+    let selectedName = normalizePaths(selected.name.split("/").reverse()[0]);
+    const dataName = selectedName + ".json";
+
+    // Extractor scripts
 
     const toData = (layer) => {
         let parent = document.selectedLayers.layers[0].parent;
@@ -148,11 +165,9 @@ export default function () {
     } else {
         let json = JSON.stringify([data], null, 2);
 
-        console.log(json);
-
         // Finally, store the information in a `dat.json` file:
         try {
-            fs.writeFileSync(dataFolder + "/data.json", json);
+            fs.writeFileSync(dataFolder + "/" + dataName, json);
             sketch.UI.message("✅ Link Data extraction complete");
         } catch (error) {
             sketch.UI.message(
@@ -183,11 +198,12 @@ function extractImages(layer, name, parent) {
     var Rectangle = sketch.Rectangle;
 
     var selectedLayer = layer;
-    var selectedLayerName = name;
-    selectedLayerName = selectedLayerName.replace(/\s/g, "-");
-    selectedLayerName = selectedLayerName.replace(/\_+/g, "-");
-    selectedLayerName = selectedLayerName.replace(/\/+/g, "-");
-    selectedLayerName = selectedLayerName.replace(/\-+/g, "-").toLowerCase();
+
+    var selectedLayerName = normalizePaths(name);
+    // selectedLayerName = selectedLayerName.replace(/\s/g, "-");
+    // selectedLayerName = selectedLayerName.replace(/\_+/g, "-");
+    // selectedLayerName = selectedLayerName.replace(/\/+/g, "-");
+    // selectedLayerName = selectedLayerName.replace(/\-+/g, "-").toLowerCase();
 
     if (imagesArray.length > 0) {
         for (let n = 0; n < imagesArray.length; n++) {
@@ -326,6 +342,16 @@ function symbolImages(layer, layerName) {
     }
 
     return currentImage;
+}
+
+function normalizePaths(path) {
+    path = path.replace(/\s/g, "-");
+    path = path.replace(/\_+/g, "-");
+    path = path.replace(/\/+/g, "-");
+    path = path.replace(/%20+/g, "-");
+    path = path.replace(/\-+/g, "-").toLowerCase();
+
+    return path;
 }
 
 // **************************************
