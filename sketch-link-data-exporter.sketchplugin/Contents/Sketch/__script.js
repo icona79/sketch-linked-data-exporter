@@ -895,115 +895,6 @@ module.exports.NOT_IMPLEMENTED = function NOT_IMPLEMENTED(name) {
 
 /***/ }),
 
-/***/ "./node_modules/hex-rgb/index.js":
-/*!***************************************!*\
-  !*** ./node_modules/hex-rgb/index.js ***!
-  \***************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return hexRgb; });
-const hexCharacters = 'a-f\\d';
-const match3or4Hex = `#?[${hexCharacters}]{3}[${hexCharacters}]?`;
-const match6or8Hex = `#?[${hexCharacters}]{6}([${hexCharacters}]{2})?`;
-const nonHexChars = new RegExp(`[^#${hexCharacters}]`, 'gi');
-const validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, 'i');
-
-function hexRgb(hex, options = {}) {
-	if (typeof hex !== 'string' || nonHexChars.test(hex) || !validHexSize.test(hex)) {
-		throw new TypeError('Expected a valid hex string');
-	}
-
-	hex = hex.replace(/^#/, '');
-	let alphaFromHex = 1;
-
-	if (hex.length === 8) {
-		alphaFromHex = Number.parseInt(hex.slice(6, 8), 16) / 255;
-		hex = hex.slice(0, 6);
-	}
-
-	if (hex.length === 4) {
-		alphaFromHex = Number.parseInt(hex.slice(3, 4).repeat(2), 16) / 255;
-		hex = hex.slice(0, 3);
-	}
-
-	if (hex.length === 3) {
-		hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-	}
-
-	const number = Number.parseInt(hex, 16);
-	const red = number >> 16;
-	const green = (number >> 8) & 255;
-	const blue = number & 255;
-	const alpha = typeof options.alpha === 'number' ? options.alpha : alphaFromHex;
-
-	if (options.format === 'array') {
-		return [red, green, blue, alpha];
-	}
-
-	if (options.format === 'css') {
-		const alphaString = alpha === 1 ? '' : ` / ${Number((alpha * 100).toFixed(2))}%`;
-		return `rgb(${red} ${green} ${blue}${alphaString})`;
-	}
-
-	return {red, green, blue, alpha};
-}
-
-
-/***/ }),
-
-/***/ "./node_modules/rgb-hex/index.js":
-/*!***************************************!*\
-  !*** ./node_modules/rgb-hex/index.js ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/* eslint-disable no-mixed-operators */
-module.exports = (red, green, blue, alpha) => {
-	const isPercent = (red + (alpha || '')).toString().includes('%');
-
-	if (typeof red === 'string') {
-		[red, green, blue, alpha] = red.match(/(0?\.?\d{1,3})%?\b/g).map(Number);
-	} else if (alpha !== undefined) {
-		alpha = parseFloat(alpha);
-	}
-
-	if (typeof red !== 'number' ||
-		typeof green !== 'number' ||
-		typeof blue !== 'number' ||
-		red > 255 ||
-		green > 255 ||
-		blue > 255
-	) {
-		throw new TypeError('Expected three numbers below 256');
-	}
-
-	if (typeof alpha === 'number') {
-		if (!isPercent && alpha >= 0 && alpha <= 1) {
-			alpha = Math.round(255 * alpha);
-		} else if (isPercent && alpha >= 0 && alpha <= 100) {
-			alpha = Math.round(255 * alpha / 100);
-		} else {
-			throw new TypeError(`Expected alpha value (${alpha}) as a fraction or percentage`);
-		}
-
-		alpha = (alpha | 1 << 8).toString(16).slice(1);
-	} else {
-		alpha = '';
-	}
-
-	return ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1) + alpha;
-};
-/* eslint-enable no-mixed-operators */
-
-
-/***/ }),
-
 /***/ "./src/script.js":
 /*!***********************!*\
   !*** ./src/script.js ***!
@@ -1019,13 +910,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/defineProperty.js");
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var rgb_hex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rgb-hex */ "./node_modules/rgb-hex/index.js");
-/* harmony import */ var rgb_hex__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(rgb_hex__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var hex_rgb__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! hex-rgb */ "./node_modules/hex-rgb/index.js");
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! util */ "util");
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! path */ "path");
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_6__);
 
 
 
@@ -1044,11 +928,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // 1. move the folter into Sketch folder
 // 2. name of the JSON file = name of the selected layer
 // 3. add to Sketch automatically
-
-
-
-
-
 var _require = __webpack_require__(/*! util */ "util"),
     isNativeObject = _require.isNativeObject;
 
@@ -1062,39 +941,15 @@ var desktopDir = path.join(os.homedir(), "Desktop");
 var dataFolder = desktopDir + "/sketch-data";
 var imagesFolder = dataFolder + "/Images";
 var imagesArray = [];
+var imagesExportedArray = [];
 createFolder(dataFolder);
-createFolder(imagesFolder); // try {
-//   if (!fs.existsSync(dataFolder)) {
-//     console.log("here");
-//     fs.mkdirSync(dataFolder);
-//   }
-// } catch (err) {
-//   console.error(err);
-// }
-// import config from "./config.json";
-// General variables
+createFolder(imagesFolder); // General variables
+// #region Sketch Items
 
-var parentPath = [];
-var variablePrefix = "$";
-var keyToDelete = "length";
-var separator = "-";
-var result = "";
-var colors = [];
-var externalShadows = [];
-var internalShadows = [];
-var gradients = [];
-var fontSizes = []; // #region Sketch Items
-
-var sketch = __webpack_require__(/*! sketch */ "sketch");
-
-var Image = __webpack_require__(/*! sketch/dom */ "sketch/dom").Image; // Document variables
+var sketch = __webpack_require__(/*! sketch */ "sketch"); // Document variables
 
 
-var doc = context.document;
 var document = sketch.getSelectedDocument();
-var artboard = sketch.Artboard;
-var data = document.sketchObject.documentData();
-var image = sketch.Image;
 var exportOptions = {
   formats: "png",
   overwriting: true,
@@ -1125,7 +980,6 @@ var exportOptions = {
   var toData = function toData(layer) {
     var parent = document.selectedLayers.layers[0].parent;
     var name = layer.name;
-    console.log(name);
 
     switch (layer.type) {
       // text layers use the value
@@ -1162,18 +1016,16 @@ var exportOptions = {
             var o = _step.value;
             var pathComponents = o.path.split("/");
             pathComponents.pop();
-
-            var _parentPath = pathComponents.join("/");
-
+            var parentPath = pathComponents.join("/");
             var affectedLayerName = o.affectedLayer.name;
 
             if (o.property === "symbolID") {
               dataGroupByPath[o.path] = {};
-              dataGroupByPath[_parentPath][affectedLayerName] = dataGroupByPath[o.path];
+              dataGroupByPath[parentPath][affectedLayerName] = dataGroupByPath[o.path];
               continue;
             }
 
-            dataGroupByPath[_parentPath][o.affectedLayer.name] = o.property === "image" ? symbolImages(layer, affectedLayerName) : o.value;
+            dataGroupByPath[parentPath][o.affectedLayer.name] = o.property === "image" ? symbolImages(layer, affectedLayerName) : o.value;
             hasValues = true;
           } // We need to remove the nodes that don't have any values
 
@@ -1183,7 +1035,6 @@ var exportOptions = {
           _iterator.f();
         }
 
-        console.log(data);
         data = removeEmptyNodes(data);
         return hasValues ? data : undefined;
       // other layers can have image fills, in case of multiple image fills only
@@ -1210,7 +1061,6 @@ var exportOptions = {
 
   var walk = function walk(layer, extract, initialValue) {
     if (!isLayerGroup(layer)) {
-      console.log(layer.name);
       return extract(layer);
     }
 
@@ -1226,11 +1076,7 @@ var exportOptions = {
         var v = void 0;
 
         if (isLayerGroup(l)) {
-          console.log(l.layers);
-
-          for (var i = 0; i < l.layers.length; i++) {
-            v = walk(l.layers[i], extract, undefined);
-          }
+          v = walk(l, toData, undefined);
         } else {
           v = extract(l);
         }
@@ -1341,9 +1187,8 @@ function extractImages(layer, name, parent) {
     nsImage = NSImage.alloc().initByReferencingFile(image.path || image);
   } else if (image && image.base64) {
     try {
-      var _data = NSData.alloc().initWithBase64EncodedString_options(image.base64, NSDataBase64DecodingIgnoreUnknownCharacters);
-
-      nsImage = NSImage.alloc().initWithData(_data);
+      var data = NSData.alloc().initWithBase64EncodedString_options(image.base64, NSDataBase64DecodingIgnoreUnknownCharacters);
+      nsImage = NSImage.alloc().initWithData(data);
     } catch (err) {
       throw new Error(err);
     }
@@ -1351,7 +1196,11 @@ function extractImages(layer, name, parent) {
     nsImage = NSImage.alloc().initWithData(image.toNSData());
   } else {
     throw new Error("`image` needs to be a Buffer");
-  }
+  } // if (!(imagesArray.length > 0 && imagesArray.includes(selectedLayerName))) {
+  //     sketch.export(rectangle, exportOptions);
+  //     imagesArray.push(selectedLayerName);
+  // }
+
 
   sketch.export(rectangle, exportOptions);
   rectangle.remove();
@@ -1388,6 +1237,14 @@ function symbolImages(layer, layerName) {
       }
     } else if (currentLayer.type === "SymbolInstance" && currentLayer.name === affectedLayerName) {
       currentImage = symbolImages(currentLayer, currentLayer.name);
+    } else if (currentLayer.type === "Group") {
+      var currentGroupLayers = currentLayer.layers;
+
+      for (var cgl = 0; cgl < currentGroupLayers.length; cgl++) {
+        if (currentGroupLayers[cgl].name === affectedLayerName) {
+          currentImage = extractImages(currentGroupLayers[cgl], currentGroupLayers[cgl].name, currentLayer);
+        }
+      }
     }
   }
 
@@ -1396,107 +1253,6 @@ function symbolImages(layer, layerName) {
   }
 
   return currentImage;
-}
-
-function extractGroups(parent) {
-  var groupData = {};
-  var groupDataGroupByPath = {
-    "": groupData
-  };
-  var groupPath = parent.name;
-  var groupDatahasValues = false;
-
-  for (var l = 0; l < parent.layers.length; l++) {
-    var layer = parent.layers[l];
-    var name = layer.name;
-    var data;
-    var dataGroupByPath;
-    var hasValues;
-
-    (function () {
-      switch (layer.type) {
-        // text layers use the value
-        case "Text":
-          groupDataGroupByPath[groupPath][name] = layer.text;
-
-        case "Image":
-          var currentImage = extractImages(layer, name, parent);
-          groupDataGroupByPath[groupPath][name] = currentImage;
-
-        case "Group":
-          var groupData = extractGroups(layer);
-          groupDataGroupByPath[groupPath][name] = groupData;
-        // symbol instances can have override values
-
-        case "SymbolInstance":
-        case "SymbolMaster":
-          // ensure overrides for nested symbols won't be processed before the
-          // actual symbol override and filter out any override values that cannot
-          // be used with data
-          var supportedProperties = ["symbolID", "stringValue", "image"];
-          var overrides = layer.overrides.sort(function (a, b) {
-            return a.path.localeCompare(b.path);
-          }).filter(function (val) {
-            return supportedProperties.includes(val.property);
-          });
-          data = {};
-          dataGroupByPath = {
-            "": data
-          };
-          hasValues = false;
-
-          var _iterator3 = _createForOfIteratorHelper(overrides),
-              _step3;
-
-          try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-              var o = _step3.value;
-              var pathComponents = o.path.split("/");
-              pathComponents.pop();
-
-              var _parentPath2 = pathComponents.join("/");
-
-              var affectedLayerName = o.affectedLayer.name;
-
-              if (o.property === "symbolID") {
-                dataGroupByPath[o.path] = {};
-                dataGroupByPath[_parentPath2][affectedLayerName] = dataGroupByPath[o.path];
-                continue;
-              }
-
-              dataGroupByPath[_parentPath2][o.affectedLayer.name] = o.property === "image" ? symbolImages(layer, affectedLayerName) : o.value;
-              hasValues = true;
-            } // We need to remove the nodes that don't have any values
-
-          } catch (err) {
-            _iterator3.e(err);
-          } finally {
-            _iterator3.f();
-          }
-
-          console.log(data);
-          data = removeEmptyNodes(data);
-          groupDataGroupByPath[groupPath][name] = hasValues ? data : undefined;
-        // other layers can have image fills, in case of multiple image fills only
-
-        default:
-          var fills = layer.style.fills;
-
-          for (var n = 0; n < fills.length; n++) {
-            var currentFill = fills[n];
-
-            if (currentFill.fillType === "Pattern") {
-              var _currentImage2 = extractImages(layer, name, parent);
-
-              groupDataGroupByPath[groupPath][name] = _currentImage2;
-            } else {
-              break;
-            }
-          }
-
-      }
-    })();
-  }
 } // **************************************
 // Object functions
 // **************************************
@@ -1630,17 +1386,6 @@ module.exports = require("path");
 /***/ (function(module, exports) {
 
 module.exports = require("sketch");
-
-/***/ }),
-
-/***/ "sketch/dom":
-/*!*****************************!*\
-  !*** external "sketch/dom" ***!
-  \*****************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("sketch/dom");
 
 /***/ }),
 
