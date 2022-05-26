@@ -1101,7 +1101,8 @@ var exportOptions = {
   if (data === undefined) {
     message("☝️ No symbol overrides found.");
   } else {
-    var json = JSON.stringify(objectectLowerCase([data]), null, 2); // Finally, store the information in a `dat.json` file:
+    var json = JSON.stringify([data], null, 2);
+    console.log(json); // Finally, store the information in a `dat.json` file:
 
     try {
       fs.writeFileSync(dataFolder + "/data.json", json);

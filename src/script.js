@@ -146,7 +146,9 @@ export default function () {
     if (data === undefined) {
         message("☝️ No symbol overrides found.");
     } else {
-        let json = JSON.stringify(objectectLowerCase([data]), null, 2);
+        let json = JSON.stringify([data], null, 2);
+
+        console.log(json);
 
         // Finally, store the information in a `dat.json` file:
         try {
