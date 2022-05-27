@@ -3,7 +3,12 @@
 var sketch = require("sketch");
 var DataSupplier = require("sketch/data-supplier");
 var document = sketch.getSelectedDocument();
-var documentName = normalizePaths(document.path.split("/").reverse()[0]);
+var documentName = "data";
+if (document.path) {
+    documentName = normalizePaths(document.path.split("/").reverse()[0]);
+    documentName = documentName.replace(".sketchcloud", "");
+    documentName = documentName.replace(".sketch", "");
+}
 
 var { isNativeObject } = require("util");
 const fs = require("@skpm/fs");
@@ -119,7 +124,7 @@ export default function () {
                     dataGroupByPath[parentPath][o.affectedLayer.name] =
                         "images/" +
                         normalizePaths(o.affectedLayer.name) +
-                        ".jpg";
+                        ".png";
                 } else {
                     dataGroupByPath[parentPath][o.affectedLayer.name] = o.value;
                 }
@@ -139,7 +144,7 @@ export default function () {
                     if (!images[key]) {
                         images[key] = imageObj;
                     }
-                    data[l.name] = "images/" + normalizePaths(l.name) + ".jpg";
+                    data[l.name] = "images/" + normalizePaths(l.name) + ".png";
                 } else {
                     var imageFill = l.style?.fills.reduce((prev, curr) => {
                         if (curr.fillType !== "Pattern") return prev;
@@ -154,7 +159,7 @@ export default function () {
                     if (!images[key]) {
                         images[key] = imageObj;
                     }
-                    data[l.name] = "images/" + key + ".jpg";
+                    data[l.name] = "images/" + key + ".png";
                 }
             }
         } else {

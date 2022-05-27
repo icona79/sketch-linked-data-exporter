@@ -898,7 +898,13 @@ var sketch = __webpack_require__(/*! sketch */ "sketch");
 var DataSupplier = __webpack_require__(/*! sketch/data-supplier */ "sketch/data-supplier");
 
 var document = sketch.getSelectedDocument();
-var documentName = normalizePaths(document.path.split("/").reverse()[0]);
+var documentName = "data";
+
+if (document.path) {
+  documentName = normalizePaths(document.path.split("/").reverse()[0]);
+  documentName = documentName.replace(".sketchcloud", "");
+  documentName = documentName.replace(".sketch", "");
+}
 
 var _require = __webpack_require__(/*! util */ "util"),
     isNativeObject = _require.isNativeObject;
@@ -930,9 +936,17 @@ var imagesArray = []; // #region Sketch Items
 
 /* harmony default export */ __webpack_exports__["default"] = (function () {
   var images = {};
+  var selectedItem = document.selectedLayers[0];
+  var selectedItemType = selectedItem.type;
 
   if (document.selectedLayers.isEmpty) {
     sketch.UI.message("Please select at least 1 layer.");
+    return;
+  } else if (document.selectedLayers > 1) {
+    sketch.UI.message("Please select maximum 1 layer.");
+    return;
+  } else if (selectedItemType !== "Group" || selectedItemType !== "SymbolInstance" || selectedItemType !== "SymbolMaster") {
+    sketch.UI.message("Please select a Group, a Symbol Instance or a Symbol Source.");
     return;
   }
 
@@ -1002,7 +1016,7 @@ var imagesArray = []; // #region Sketch Items
               images[key] = imageObj;
             }
 
-            dataGroupByPath[parentPath][o.affectedLayer.name] = "images/" + normalizePaths(o.affectedLayer.name) + ".jpg";
+            dataGroupByPath[parentPath][o.affectedLayer.name] = "images/" + normalizePaths(o.affectedLayer.name) + ".png";
           } else {
             dataGroupByPath[parentPath][o.affectedLayer.name] = o.value;
           }
@@ -1035,7 +1049,7 @@ var imagesArray = []; // #region Sketch Items
               images[key] = _imageObj;
             }
 
-            data[l.name] = "images/" + normalizePaths(l.name) + ".jpg";
+            data[l.name] = "images/" + normalizePaths(l.name) + ".png";
           } else {
             var _l$style;
 
@@ -1054,7 +1068,7 @@ var imagesArray = []; // #region Sketch Items
               images[key] = _imageObj2;
             }
 
-            data[l.name] = "images/" + key + ".jpg";
+            data[l.name] = "images/" + key + ".png";
           }
         }
       } catch (err) {
