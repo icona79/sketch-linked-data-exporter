@@ -88,7 +88,7 @@ var exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/script.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/script-condensed.js");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -869,10 +869,10 @@ module.exports.NOT_IMPLEMENTED = function NOT_IMPLEMENTED(name) {
 
 /***/ }),
 
-/***/ "./src/script.js":
-/*!***********************!*\
-  !*** ./src/script.js ***!
-  \***********************/
+/***/ "./src/script-condensed.js":
+/*!*********************************!*\
+  !*** ./src/script-condensed.js ***!
+  \*********************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1235,4 +1235,4 @@ module.exports = require("util");
 globalThis['onRun'] = __skpm_run.bind(this, 'default');
 globalThis['onShutdown'] = __skpm_run.bind(this, 'onShutdown')
 
-//# sourceMappingURL=__script.js.map
+//# sourceMappingURL=__script-condensed.js.map

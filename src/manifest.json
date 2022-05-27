@@ -1,23 +1,23 @@
 {
-  "compatibleVersion": 3,
-  "bundleVersion": 1,
-  "commands": [
-    {
-      "name": "Sketch Link Data exporter",
-      "identifier": "slde-script",
-      "script": "./script.js",
-      "handlers": {
-        "run": "onRun",
-        "actions": {
-          "Shutdown": "onShutdown"
+    "compatibleVersion": 3,
+    "bundleVersion": 1,
+    "commands": [
+        {
+            "name": "💿 Sketch Link Data exporter",
+            "identifier": "slde-script",
+            "script": "./script.js",
+            "handlers": {
+                "run": "onRun",
+                "actions": {
+                    "Shutdown": "onShutdown"
+                }
+            }
         }
-      }
-    }
-  ],
-  "menu": {
-    "title": "sketch-link-data-exporter",
-    "items": ["slde-script"],
-    "isRoot": true
-  },
-  "icon": "icon.png"
+    ],
+    "menu": {
+        "title": "sketch-link-data-exporter",
+        "items": ["slde-script"],
+        "isRoot": true
+    },
+    "icon": "icon.png"
 }
