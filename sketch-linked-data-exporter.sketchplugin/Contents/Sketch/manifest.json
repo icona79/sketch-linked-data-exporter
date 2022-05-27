@@ -3,7 +3,7 @@
   "bundleVersion": 1,
   "commands": [
     {
-      "name": "💿 Sketch Link Data exporter",
+      "name": "💿 Sketch Linked Data exporter",
       "identifier": "slde-script",
       "script": "__script.js",
       "handlers": {
@@ -15,7 +15,7 @@
     }
   ],
   "menu": {
-    "title": "sketch-link-data-exporter",
+    "title": "sketch-linked-data-exporter",
     "items": [
       "slde-script"
     ],
@@ -24,8 +24,8 @@
   "icon": "icon.png",
   "version": "0.0.1",
   "description": "With this plugin you can export to your desktop a link data ready JSON file with images paths too.",
-  "name": "Sketch - Link Data exporter",
-  "identifier": "Sketch - Link Data exporter",
+  "name": "Sketch - Linked Data exporter",
+  "identifier": "Sketch - Linked Data exporter",
   "disableCocoaScriptPreprocessor": true,
   "appcast": "https://raw.githubusercontent.com/icona79/sketch-link-data-manager/master/.appcast.xml",
   "author": "Matteo Gratton",

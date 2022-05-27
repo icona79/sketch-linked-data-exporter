@@ -20,7 +20,7 @@ const sketchDir = path.join(
     "Library/Application Support/com.bohemiancoding.sketch3"
 );
 
-const sketchDataFolder = sketchDir + "/Link-Data";
+const sketchDataFolder = sketchDir + "/Linked-Data";
 createFolder(sketchDataFolder);
 
 // Setup the folder structure to export our data
@@ -47,8 +47,9 @@ var imagesArray = [];
 
 export default function () {
     let images = {};
-    let selectedItem = document.selectedLayers[0];
+    let selectedItem = document.selectedLayers.layers[0];
     let selectedItemType = selectedItem.type;
+    console.log(selectedItemType);
     if (document.selectedLayers.isEmpty) {
         sketch.UI.message("Please select at least 1 layer.");
         return;
@@ -56,8 +57,8 @@ export default function () {
         sketch.UI.message("Please select maximum 1 layer.");
         return;
     } else if (
-        selectedItemType !== "Group" ||
-        selectedItemType !== "SymbolInstance" ||
+        selectedItemType !== "Group" &&
+        selectedItemType !== "SymbolInstance" &&
         selectedItemType !== "SymbolMaster"
     ) {
         sketch.UI.message(
@@ -75,7 +76,7 @@ export default function () {
         }
     }
 
-    const dataName = documentName + ".json";
+    const dataName = normalizePaths(selectedItem.name) + ".json";
 
     if (dataFolder) {
         var imagesData = Object.values(images);
@@ -187,6 +188,23 @@ export default function () {
             fs.writeFileSync(filePath, json);
 
             sketch.UI.message("✅ Link Data extraction complete");
+
+            const url = NSURL.fileURLWithPath(filePath);
+
+            const dataManager =
+                AppController.sharedInstance().dataSupplierManager();
+
+            if (dataManager.canAddLocalDataGroupWithURL(url)) {
+                const dataSupplierGroup =
+                    MSLocalDataSupplierGroup.localDataSupplierGroupFromFileSystemURL_dataSupplierDelegate_error_(
+                        url,
+                        dataManager,
+                        nil
+                    );
+                if (dataSupplierGroup) {
+                    dataManager.addLocalDataSupplierGroup(dataSupplierGroup);
+                }
+            }
         } catch (error) {
             sketch.UI.message(
                 "⛔️ There was an error writing your file on Desktop"
