@@ -3,7 +3,7 @@
     "bundleVersion": 1,
     "commands": [
         {
-            "name": "💿 Sketch Linked Data exporter",
+            "name": "💿 Linked Data exporter",
             "identifier": "slde-script",
             "script": "./script.js",
             "handlers": {

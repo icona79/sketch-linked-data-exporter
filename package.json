@@ -1,12 +1,12 @@
 {
     "name": "sketch-linked-data-exporter",
-    "description": "With this plugin you can export to your desktop a link data ready JSON file with images paths too.",
-    "version": "0.0.1",
+    "description": "Export selection as Linked Data-ready JSON file and images",
+    "version": "0.0.2",
     "engines": {
         "sketch": ">=3.0"
     },
     "skpm": {
-        "name": "Sketch - Linked Data exporter",
+        "name": "Linked Data exporter",
         "manifest": "src/manifest.json",
         "main": "sketch-linked-data-exporter.sketchplugin",
         "assets": [
