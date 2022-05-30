@@ -1,5 +1,3 @@
-// TODO:
-// Add to Sketch automatically
 var sketch = require("sketch");
 var DataSupplier = require("sketch/data-supplier");
 var document = sketch.getSelectedDocument();
@@ -37,19 +35,9 @@ const exportOptions = {
     output: imagesFolder,
 };
 
-// General variables
-var imagesArray = [];
-// #region Sketch Items
-
-// Document variables
-
-// #endregion
-
 export default function () {
     let images = {};
     let selectedItem = document.selectedLayers.layers[0];
-    let selectedItemType = selectedItem.type;
-    console.log(selectedItemType);
     if (document.selectedLayers.isEmpty) {
         sketch.UI.message("Please select at least 1 layer.");
         return;
@@ -57,9 +45,9 @@ export default function () {
         sketch.UI.message("Please select maximum 1 layer.");
         return;
     } else if (
-        selectedItemType !== "Group" &&
-        selectedItemType !== "SymbolInstance" &&
-        selectedItemType !== "SymbolMaster"
+        selectedItem.type !== "Group" &&
+        selectedItem.type !== "SymbolInstance" &&
+        selectedItem.type !== "SymbolMaster"
     ) {
         sketch.UI.message(
             "Please select a Group, a Symbol Instance or a Symbol Source."
@@ -116,7 +104,8 @@ export default function () {
                 if (o.property == "image") {
                     var key = String(o.value.id);
                     let imageObj = {};
-                    imageObj["name"] = normalizePaths(o.affectedLayer.name);
+                    imageObj["name"] =
+                        normalizePaths(o.affectedLayer.name) + "-" + key;
                     imageObj["layer"] = o.value;
                     imageObj["parent"] = parent;
                     if (!images[key]) {
@@ -125,6 +114,8 @@ export default function () {
                     dataGroupByPath[parentPath][o.affectedLayer.name] =
                         "images/" +
                         normalizePaths(o.affectedLayer.name) +
+                        "-" +
+                        key +
                         ".png";
                 } else {
                     dataGroupByPath[parentPath][o.affectedLayer.name] = o.value;
@@ -139,13 +130,14 @@ export default function () {
                 } else if (l.type == "Image") {
                     var key = String(l.image.id);
                     let imageObj = {};
-                    imageObj["name"] = normalizePaths(l.name);
+                    imageObj["name"] = normalizePaths(l.name) + "-" + key;
                     imageObj["layer"] = l.image;
                     imageObj["parent"] = parent;
                     if (!images[key]) {
                         images[key] = imageObj;
                     }
-                    data[l.name] = "images/" + normalizePaths(l.name) + ".png";
+                    data[l.name] =
+                        "images/" + normalizePaths(l.name) + "-" + key + ".png";
                 } else {
                     var imageFill = l.style?.fills.reduce((prev, curr) => {
                         if (curr.fillType !== "Pattern") return prev;
@@ -154,13 +146,13 @@ export default function () {
                     if (!imageFill) break;
                     var key = String(imageFill);
                     let imageObj = {};
-                    imageObj["name"] = l.name;
+                    imageObj["name"] = l.name + "-" + key;
                     imageObj["layer"] = imageFill;
                     imageObj["parent"] = parent;
                     if (!images[key]) {
                         images[key] = imageObj;
                     }
-                    data[l.name] = "images/" + key + ".png";
+                    data[l.name] = "images/" + l.name + "-" + key + ".png";
                 }
             }
         } else {

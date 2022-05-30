@@ -891,8 +891,6 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-// TODO:
-// Add to Sketch automatically
 var sketch = __webpack_require__(/*! sketch */ "sketch");
 
 var DataSupplier = __webpack_require__(/*! sketch/data-supplier */ "sketch/data-supplier");
@@ -928,17 +926,10 @@ var exportOptions = {
   formats: "png",
   overwriting: true,
   output: imagesFolder
-}; // General variables
-
-var imagesArray = []; // #region Sketch Items
-// Document variables
-// #endregion
-
+};
 /* harmony default export */ __webpack_exports__["default"] = (function () {
   var images = {};
   var selectedItem = document.selectedLayers.layers[0];
-  var selectedItemType = selectedItem.type;
-  console.log(selectedItemType);
 
   if (document.selectedLayers.isEmpty) {
     sketch.UI.message("Please select at least 1 layer.");
@@ -946,7 +937,7 @@ var imagesArray = []; // #region Sketch Items
   } else if (document.selectedLayers > 1) {
     sketch.UI.message("Please select maximum 1 layer.");
     return;
-  } else if (selectedItemType !== "Group" && selectedItemType !== "SymbolInstance" && selectedItemType !== "SymbolMaster") {
+  } else if (selectedItem.type !== "Group" && selectedItem.type !== "SymbolInstance" && selectedItem.type !== "SymbolMaster") {
     sketch.UI.message("Please select a Group, a Symbol Instance or a Symbol Source.");
     return;
   }
@@ -1009,7 +1000,7 @@ var imagesArray = []; // #region Sketch Items
           if (o.property == "image") {
             var key = String(o.value.id);
             var imageObj = {};
-            imageObj["name"] = normalizePaths(o.affectedLayer.name);
+            imageObj["name"] = normalizePaths(o.affectedLayer.name) + "-" + key;
             imageObj["layer"] = o.value;
             imageObj["parent"] = parent;
 
@@ -1017,7 +1008,7 @@ var imagesArray = []; // #region Sketch Items
               images[key] = imageObj;
             }
 
-            dataGroupByPath[parentPath][o.affectedLayer.name] = "images/" + normalizePaths(o.affectedLayer.name) + ".png";
+            dataGroupByPath[parentPath][o.affectedLayer.name] = "images/" + normalizePaths(o.affectedLayer.name) + "-" + key + ".png";
           } else {
             dataGroupByPath[parentPath][o.affectedLayer.name] = o.value;
           }
@@ -1042,7 +1033,7 @@ var imagesArray = []; // #region Sketch Items
           } else if (l.type == "Image") {
             var key = String(l.image.id);
             var _imageObj = {};
-            _imageObj["name"] = normalizePaths(l.name);
+            _imageObj["name"] = normalizePaths(l.name) + "-" + key;
             _imageObj["layer"] = l.image;
             _imageObj["parent"] = parent;
 
@@ -1050,7 +1041,7 @@ var imagesArray = []; // #region Sketch Items
               images[key] = _imageObj;
             }
 
-            data[l.name] = "images/" + normalizePaths(l.name) + ".png";
+            data[l.name] = "images/" + normalizePaths(l.name) + "-" + key + ".png";
           } else {
             var _l$style;
 
@@ -1061,7 +1052,7 @@ var imagesArray = []; // #region Sketch Items
             if (!imageFill) break;
             var key = String(imageFill);
             var _imageObj2 = {};
-            _imageObj2["name"] = l.name;
+            _imageObj2["name"] = l.name + "-" + key;
             _imageObj2["layer"] = imageFill;
             _imageObj2["parent"] = parent;
 
@@ -1069,7 +1060,7 @@ var imagesArray = []; // #region Sketch Items
               images[key] = _imageObj2;
             }
 
-            data[l.name] = "images/" + key + ".png";
+            data[l.name] = "images/" + l.name + "-" + key + ".png";
           }
         }
       } catch (err) {
