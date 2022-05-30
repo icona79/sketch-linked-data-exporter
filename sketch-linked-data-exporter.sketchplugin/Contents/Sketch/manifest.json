@@ -22,7 +22,7 @@
     "isRoot": true
   },
   "icon": "icon.png",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Export selection as Linked Data-ready JSON file and images",
   "name": "Linked Data exporter",
   "identifier": "Linked Data exporter",
