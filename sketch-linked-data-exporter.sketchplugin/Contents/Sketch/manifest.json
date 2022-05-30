@@ -22,12 +22,12 @@
     "isRoot": true
   },
   "icon": "icon.png",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Export selection as Linked Data-ready JSON file and images",
   "name": "Linked Data exporter",
   "identifier": "Linked Data exporter",
   "disableCocoaScriptPreprocessor": true,
-  "appcast": "https://raw.githubusercontent.com/icona79/sketch-link-data-manager/master/.appcast.xml",
+  "appcast": "https://raw.githubusercontent.com/icona79/sketch-linked-data-exporter/master/.appcast.xml",
   "author": "Matteo Gratton",
   "authorEmail": "icona79@gmail.com"
 }
