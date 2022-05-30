@@ -43,6 +43,6 @@
     "author": "Matteo Gratton <icona79@gmail.com>",
     "repository": {
         "type": "git",
-        "url": "https://github.com/icona79/sketch-link-data-manager.git"
+        "url": "https://github.com/icona79/sketch-linked-data-exporter.git"
     }
 }
