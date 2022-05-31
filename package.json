@@ -30,7 +30,6 @@
         "resources/**/*.js"
     ],
     "dependencies": {
-        "glob-parent": ">=5.1.2",
         "@skpm/fs": "^0.2.6",
         "@types/node": "17.0.23",
         "hex-rgb": "^5.0.0",

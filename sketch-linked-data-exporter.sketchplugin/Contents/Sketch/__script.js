@@ -896,6 +896,7 @@ var sketch = __webpack_require__(/*! sketch */ "sketch");
 var DataSupplier = __webpack_require__(/*! sketch/data-supplier */ "sketch/data-supplier");
 
 var document = sketch.getSelectedDocument();
+var selectedItem = document.selectedLayers.layers[0];
 var documentName = "data";
 
 if (document.path) {
@@ -915,11 +916,13 @@ var path = __webpack_require__(/*! path */ "path");
 
 var desktopDir = path.join(os.homedir(), "Desktop");
 var sketchDir = path.join(os.homedir(), "Library/Application Support/com.bohemiancoding.sketch3");
+var dataName = normalizePaths(selectedItem.name) + ".json";
 var sketchDataFolder = sketchDir + "/Linked-Data";
 createFolder(sketchDataFolder); // Setup the folder structure to export our data
 
 var dataFolder = sketchDataFolder + "/Data-" + documentName;
-var imagesFolder = dataFolder + "/Images";
+var imagesFolder = dataFolder + "/Images-" + normalizePaths(selectedItem.name);
+var imagesFolderForJSON = "/Images-" + normalizePaths(selectedItem.name);
 createFolder(dataFolder);
 createFolder(imagesFolder);
 var exportOptions = {
@@ -929,7 +932,6 @@ var exportOptions = {
 };
 /* harmony default export */ __webpack_exports__["default"] = (function () {
   var images = {};
-  var selectedItem = document.selectedLayers.layers[0];
 
   if (document.selectedLayers.isEmpty) {
     sketch.UI.message("Please select at least 1 layer.");
@@ -952,8 +954,6 @@ var exportOptions = {
       json.push(data);
     }
   }
-
-  var dataName = normalizePaths(selectedItem.name) + ".json";
 
   if (dataFolder) {
     var imagesData = Object.values(images);
@@ -1008,7 +1008,7 @@ var exportOptions = {
               images[key] = imageObj;
             }
 
-            dataGroupByPath[parentPath][o.affectedLayer.name] = "images/" + normalizePaths(o.affectedLayer.name) + "-" + key + ".png";
+            dataGroupByPath[parentPath][o.affectedLayer.name] = imagesFolderForJSON + "/" + normalizePaths(o.affectedLayer.name) + "-" + key + ".png";
           } else {
             dataGroupByPath[parentPath][o.affectedLayer.name] = o.value;
           }
@@ -1041,7 +1041,7 @@ var exportOptions = {
               images[key] = _imageObj;
             }
 
-            data[l.name] = "images/" + normalizePaths(l.name) + "-" + key + ".png";
+            data[l.name] = imagesFolderForJSON + "/" + normalizePaths(l.name) + "-" + key + ".png";
           } else {
             var _l$style;
 
@@ -1060,7 +1060,7 @@ var exportOptions = {
               images[key] = _imageObj2;
             }
 
-            data[l.name] = "images/" + l.name + "-" + key + ".png";
+            data[l.name] = imagesFolderForJSON + "/" + l.name + "-" + key + ".png";
           }
         }
       } catch (err) {

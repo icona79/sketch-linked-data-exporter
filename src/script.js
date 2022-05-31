@@ -1,6 +1,7 @@
 var sketch = require("sketch");
 var DataSupplier = require("sketch/data-supplier");
 var document = sketch.getSelectedDocument();
+var selectedItem = document.selectedLayers.layers[0];
 var documentName = "data";
 if (document.path) {
     documentName = normalizePaths(document.path.split("/").reverse()[0]);
@@ -18,13 +19,17 @@ const sketchDir = path.join(
     "Library/Application Support/com.bohemiancoding.sketch3"
 );
 
+const dataName = normalizePaths(selectedItem.name) + ".json";
+
 const sketchDataFolder = sketchDir + "/Linked-Data";
 createFolder(sketchDataFolder);
 
 // Setup the folder structure to export our data
 
 const dataFolder = sketchDataFolder + "/Data-" + documentName;
-const imagesFolder = dataFolder + "/Images";
+const imagesFolder =
+    dataFolder + "/Images-" + normalizePaths(selectedItem.name);
+const imagesFolderForJSON = "/Images-" + normalizePaths(selectedItem.name);
 
 createFolder(dataFolder);
 createFolder(imagesFolder);
@@ -37,7 +42,7 @@ const exportOptions = {
 
 export default function () {
     let images = {};
-    let selectedItem = document.selectedLayers.layers[0];
+
     if (document.selectedLayers.isEmpty) {
         sketch.UI.message("Please select at least 1 layer.");
         return;
@@ -63,8 +68,6 @@ export default function () {
             json.push(data);
         }
     }
-
-    const dataName = normalizePaths(selectedItem.name) + ".json";
 
     if (dataFolder) {
         var imagesData = Object.values(images);
@@ -112,7 +115,8 @@ export default function () {
                         images[key] = imageObj;
                     }
                     dataGroupByPath[parentPath][o.affectedLayer.name] =
-                        "images/" +
+                        imagesFolderForJSON +
+                        "/" +
                         normalizePaths(o.affectedLayer.name) +
                         "-" +
                         key +
@@ -137,7 +141,12 @@ export default function () {
                         images[key] = imageObj;
                     }
                     data[l.name] =
-                        "images/" + normalizePaths(l.name) + "-" + key + ".png";
+                        imagesFolderForJSON +
+                        "/" +
+                        normalizePaths(l.name) +
+                        "-" +
+                        key +
+                        ".png";
                 } else {
                     var imageFill = l.style?.fills.reduce((prev, curr) => {
                         if (curr.fillType !== "Pattern") return prev;
@@ -152,7 +161,8 @@ export default function () {
                     if (!images[key]) {
                         images[key] = imageObj;
                     }
-                    data[l.name] = "images/" + l.name + "-" + key + ".png";
+                    data[l.name] =
+                        imagesFolderForJSON + "/" + l.name + "-" + key + ".png";
                 }
             }
         } else {
