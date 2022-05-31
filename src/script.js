@@ -169,7 +169,6 @@ export default function () {
             return null;
         }
         data = removeEmptyNodes(data);
-        data.reverse();
         return data;
     }
 
