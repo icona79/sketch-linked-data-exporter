@@ -971,7 +971,9 @@ var exportOptions = {
 
     if (layer.type == "SymbolInstance" || layer.type == "SymbolMaster") {
       var overrides = layer.overrides.filter(function (o) {
-        return o.editable && ["symbolID", "stringValue", "image"].includes(o.property);
+        return (// o.editable &&
+          ["symbolID", "stringValue", "image"].includes(o.property)
+        );
       });
       var dataGroupByPath = {
         "": data

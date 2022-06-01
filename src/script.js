@@ -87,7 +87,7 @@ export default function () {
         if (layer.type == "SymbolInstance" || layer.type == "SymbolMaster") {
             var overrides = layer.overrides.filter(function (o) {
                 return (
-                    o.editable &&
+                    // o.editable &&
                     ["symbolID", "stringValue", "image"].includes(o.property)
                 );
             });
