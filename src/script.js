@@ -189,7 +189,15 @@ export default function () {
             let filePath = dataFolder + "/" + dataName;
             fs.writeFileSync(filePath, json);
 
-            sketch.UI.message("✅ Link Data extraction complete");
+            let message =
+                "The " +
+                dataName +
+                " dataset is now available in your Sketch data sources";
+            message += "\n";
+            message +=
+                "From your Preferences modal -> Data, you can access the folder that contains it.";
+
+            sketch.UI.alert("Link Data extraction complete", message);
 
             const url = NSURL.fileURLWithPath(filePath);
 
