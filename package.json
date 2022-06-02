@@ -1,7 +1,7 @@
 {
     "name": "sketch-linked-data-exporter",
     "description": "Export selection as Linked Data-ready JSON file and images",
-    "version": "3.5.0",
+    "version": "3.6.0",
     "engines": {
         "sketch": ">=3.0"
     },
